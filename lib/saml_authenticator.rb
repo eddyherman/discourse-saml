@@ -8,10 +8,9 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
   end
 
   def remove_spaces
-    gsub!(/\A[[:space:]]+/, '')
-    gsub!(/[[:space:]]+\z/, '')
-    gsub!(/[[:space:]]+/, ' ')
-    self
+    string = strip
+    string.gsub!(/\s+/, ' ')
+    string
   end
   
   def initialize(name, opts = {})
@@ -216,7 +215,7 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     groups_fullsync = GlobalSetting.try(:saml_groups_fullsync) || false
     group_attribute = GlobalSetting.try(:saml_groups_attribute) || 'memberOf'
     user_group_list = (attributes[group_attribute] || []).map(&:downcase)
-    user_group_list.remove_spaces
+    user_group_list = user_group_list.remove_spaces
 
     if groups_fullsync
       user_has_groups = user.groups.where(automatic: false).pluck(:name).map(&:downcase)

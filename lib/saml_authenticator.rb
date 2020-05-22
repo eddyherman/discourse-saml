@@ -208,8 +208,8 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     return unless GlobalSetting.try(:saml_sync_groups)
     groups_fullsync = GlobalSetting.try(:saml_groups_fullsync) || false
     group_attribute = GlobalSetting.try(:saml_groups_attribute) || 'memberOf'
-    user_group_list = (attributes[group_attribute] || []).map(&:downcase).delete(' ')
-
+    user_group_list = (attributes[group_attribute.delete(' ')] || []).map(&:downcase)
+    
     if groups_fullsync
       user_has_groups = user.groups.where(automatic: false).pluck(:name).map(&:downcase)
       groups_to_add = user_group_list - user_has_groups

@@ -7,6 +7,13 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     @info = info.present? ? info.with_indifferent_access : info
   end
 
+  def remove_spaces
+    gsub!(/\A[[:space:]]+/, '')
+    gsub!(/[[:space:]]+\z/, '')
+    gsub!(/[[:space:]]+/, ' ')
+    self
+  end
+  
   def initialize(name, opts = {})
     opts[:trusted] ||= true
     super(name, opts)
@@ -209,6 +216,7 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     groups_fullsync = GlobalSetting.try(:saml_groups_fullsync) || false
     group_attribute = GlobalSetting.try(:saml_groups_attribute) || 'memberOf'
     user_group_list = (attributes[group_attribute] || []).map(&:downcase)
+    user_group_list.remove_spaces
 
     if groups_fullsync
       user_has_groups = user.groups.where(automatic: false).pluck(:name).map(&:downcase)
